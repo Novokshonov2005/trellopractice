@@ -1,0 +1,17 @@
+@import "tailwindcss";
+
+body {
+  font-family: 'Noto Sans', sans-serif;
+  margin: 0;
+  padding: 0;
+  color:white;
+}
+.logo__name{
+  font-family: 'Raleway', sans-serif;
+   font-size: 31px; 
+  font-weight: bold;
+}
+:root {
+  --tenma-header:#1d2125;
+
+}
