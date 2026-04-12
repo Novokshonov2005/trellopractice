@@ -9,6 +9,7 @@ export function BoardShell({
   onDeleteCard,
   onAddList,
   onDeleteList,
+  onOpenCard,
 }) {
   const showTitle = Boolean(title?.trim());
 
@@ -36,6 +37,7 @@ export function BoardShell({
           onDeleteCard={onDeleteCard}
           onAddList={onAddList}
           onDeleteList={onDeleteList}
+          onOpenCard={onOpenCard}
         />
       </div>
     </div>

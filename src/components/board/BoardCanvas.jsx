@@ -8,6 +8,7 @@ export function BoardCanvas({
   onDeleteCard,
   onAddList,
   onDeleteList,
+   onOpenCard,
 }) {
   return (
     <div className="flex min-h-0 flex-1 items-start gap-3 overflow-x-auto overflow-y-auto px-1 py-1 sm:px-2">
@@ -18,6 +19,7 @@ export function BoardCanvas({
           onAddCard={onAddCard}
           onDeleteCard={onDeleteCard}
           onDeleteList={onDeleteList}
+           onOpenCard={onOpenCard}
         />
       ))}
       <button

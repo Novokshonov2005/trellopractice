@@ -3,6 +3,7 @@ import { TbArrowsMaximize, TbArrowsMinimize } from "react-icons/tb";
 import { BsThreeDots } from "react-icons/bs";
 import { IoAdd } from "react-icons/io5";
 import { BoardCard } from "./BoardCard";
+import { CardFormField } from "./CardField";
 
 const tintStyles = {
   board: "bg-[#2b2b30]",
@@ -17,31 +18,18 @@ export function BoardList({
   onAddCard,
   onDeleteCard,
   onDeleteList,
+  onOpenCard,
 }) {
   const [collapsed, setCollapsed] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const [composing, setComposing] = useState(false);
-  const [draft, setDraft] = useState("");
+  const [composerKey, setComposerKey] = useState(0);
 
   const bg = tintStyles[list.tint] ?? tintStyles.board;
 
-  function submitCard() {
-    const t = draft.trim();
-    if (!t) {
-      setComposing(false);
-      setDraft("");
-      return;
-    }
-    onAddCard(list.id, t);
-    setDraft("");
-    setComposing(false);
-  }
-
   function handleDeleteList() {
     setMenuOpen(false);
-    if (
-      !window.confirm("Удалить этот список и все карточки в нём?")
-    ) {
+    if (!window.confirm("Удалить этот список и все карточки в нём?")) {
       return;
     }
     onDeleteList(list.id);
@@ -106,61 +94,39 @@ export function BoardList({
               <BoardCard
                 key={card.id}
                 card={card}
+                listId={list.id}
                 onDelete={
                   card.kind === "text"
                     ? (cardId) => onDeleteCard(list.id, cardId)
                     : undefined
                 }
+                onOpenCard={onOpenCard}
               />
             ))}
           </div>
 
           <div className="shrink-0 px-2 pb-3">
             {composing ? (
-              <div className="flex flex-col gap-2 rounded-lg bg-black/25 p-2 ring-1 ring-white/10">
-                <input
-                  type="text"
-                  value={draft}
-                  onChange={(e) => setDraft(e.target.value)}
-                  placeholder="Заголовок карточки"
-                  className="w-full rounded-md border border-white/15 bg-[#1a1d21] px-2 py-2 text-sm text-white outline-none placeholder:text-white/40 focus:border-[#579dff]/50"
-                  autoFocus
-                  onKeyDown={(e) => {
-                    if (e.key === "Escape") {
-                      setComposing(false);
-                      setDraft("");
-                    }
-                    if (e.key === "Enter") {
-                      e.preventDefault();
-                      submitCard();
-                    }
-                  }}
+              <div className="rounded-lg bg-black/25 p-2 ring-1 ring-white/10">
+                <CardFormField
+                  key={composerKey}
+                  submitLabel="Добавить"
+                  autoFocusTitle
+                  onSubmit={(data) => {
+                    onAddCard(list.id, data);
+                    setComposing(false);
+}}
+                  onCancel={() => setComposing(false)}
                 />
-                <div className="flex gap-2">
-                  <button
-                    type="button"
-                    className="rounded-md bg-[#579dff] px-3 py-1.5 text-xs font-semibold text-white hover:bg-[#6cabff]"
-                    onClick={submitCard}
-                  >
-                    Добавить
-                  </button>
-                  <button
-                    type="button"
-                    className="rounded-md px-3 py-1.5 text-xs text-white/80 hover:bg-white/10"
-                    onClick={() => {
-                      setComposing(false);
-                      setDraft("");
-                    }}
-                  >
-                    Отмена
-                  </button>
-                </div>
               </div>
             ) : (
               <button
                 type="button"
                 className="flex w-full items-center justify-between gap-2 rounded-lg px-3 py-2.5 text-left text-sm text-white/90 transition hover:bg-white/10 hover:text-white"
-                onClick={() => setComposing(true)}
+                onClick={() => {
+                  setComposerKey((k) => k + 1);
+                  setComposing(true);
+                }}
               >
                 <span>+ Добавить карточку</span>
                 <IoAdd size={20} className="shrink-0 opacity-90" aria-hidden />
