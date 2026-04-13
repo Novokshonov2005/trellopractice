@@ -1,6 +1,8 @@
-import { useState } from "react";
+import { useCallback, useState } from "react";
 import { useLocation, useParams } from "react-router-dom";
+import { reorderListsFromDrag } from "../components/board/BoardDragHandler";
 import { BoardShell } from "../components/board/BoardShell";
+import { CardEditModal } from "../components/Cards/CardEdit";
 import { defaultLists } from "../data/boardDefault";
 import { newId } from "../utils/newId";
 
@@ -23,8 +25,18 @@ export function BoardPage() {
   const initial = buildBoard(boardId ?? "demo", location.state?.board);
   const [lists, setLists] = useState(initial.lists);
   const { title } = initial;
+  const [editTarget, setEditTarget] = useState(null);
 
-  function handleAddCard(listId, cardTitle) {
+  const cardBeingEdited =
+    editTarget != null
+      ? (lists
+          .find((l) => l.id === editTarget.listId)
+          ?.cards.find((c) => c.id === editTarget.cardId) ?? null)
+      : null;
+
+  function handleAddCard(listId, { title: cardTitle, description, images }) {
+    const t = cardTitle.trim();
+    if (!t) return;
     setLists((prev) =>
       prev.map((l) =>
         l.id === listId
@@ -32,12 +44,41 @@ export function BoardPage() {
               ...l,
               cards: [
                 ...l.cards,
-                { id: newId(), kind: "text", title: cardTitle },
+                {
+                  id: newId(),
+                  kind: "text",
+                  title: t,
+                  description: (description ?? "").trim(),
+                  images: Array.isArray(images) ? [...images] : [],
+                },
               ],
             }
           : l,
       ),
     );
+  }
+
+  function handleUpdateCard(listId, cardId, payload) {
+    setLists((prev) =>
+      prev.map((l) =>
+        l.id !== listId
+          ? l
+          : {
+              ...l,
+              cards: l.cards.map((c) =>
+                c.id !== cardId
+                  ? c
+                  : {
+                      ...c,
+                      title: payload.title,
+                      description: payload.description,
+                      images: payload.images,
+                    },
+              ),
+            },
+      ),
+    );
+    setEditTarget(null);
   }
 
   function handleDeleteCard(listId, cardId) {
@@ -48,10 +89,14 @@ export function BoardPage() {
           : l,
       ),
     );
+    setEditTarget((cur) =>
+      cur?.listId === listId && cur?.cardId === cardId ? null : cur,
+    );
   }
 
   function handleDeleteList(listId) {
     setLists((prev) => prev.filter((l) => l.id !== listId));
+    setEditTarget((cur) => (cur?.listId === listId ? null : cur));
   }
 
   function handleAddList() {
@@ -69,14 +114,32 @@ export function BoardPage() {
     ]);
   }
 
+  const handleDragEnd = useCallback((event) => {
+    setLists((prev) => reorderListsFromDrag(event, prev) ?? prev);
+  }, []);
+
   return (
-    <BoardShell
-      title={title}
-      lists={lists}
-      onAddCard={handleAddCard}
-      onDeleteCard={handleDeleteCard}
-      onAddList={handleAddList}
-      onDeleteList={handleDeleteList}
-    />
+    <>
+      <BoardShell
+        title={title}
+        lists={lists}
+        onAddCard={handleAddCard}
+        onDeleteCard={handleDeleteCard}
+        onAddList={handleAddList}
+        onDeleteList={handleDeleteList}
+        onOpenCard={(listId, cardId) => setEditTarget({ listId, cardId })}
+        onDragEnd={handleDragEnd}
+      />
+      {editTarget && cardBeingEdited && cardBeingEdited.kind === "text" ? (
+        <CardEditModal
+          key={editTarget.cardId}
+          card={cardBeingEdited}
+          onClose={() => setEditTarget(null)}
+          onSave={(payload) =>
+            handleUpdateCard(editTarget.listId, editTarget.cardId, payload)
+          }
+        />
+      ) : null}
+    </>
   );
 }

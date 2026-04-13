@@ -1,9 +1,11 @@
 import { useState } from "react";
+import { SortableContext, verticalListSortingStrategy } from "@dnd-kit/sortable";
 import { TbArrowsMaximize, TbArrowsMinimize } from "react-icons/tb";
 import { BsThreeDots } from "react-icons/bs";
 import { IoAdd } from "react-icons/io5";
-import { BoardCard } from "./BoardCard";
-import { CardFormField } from "./CardField";
+import { MdDragIndicator } from "react-icons/md";
+import { SortBoardCard } from "./SortBoardCard";
+import { CardFormField } from "../Cards/CardField";
 
 const tintStyles = {
   board: "bg-[#2b2b30]",
@@ -15,6 +17,7 @@ const tintStyles = {
 
 export function BoardList({
   list,
+  columnDragListeners,
   onAddCard,
   onDeleteCard,
   onDeleteList,
@@ -26,6 +29,7 @@ export function BoardList({
   const [composerKey, setComposerKey] = useState(0);
 
   const bg = tintStyles[list.tint] ?? tintStyles.board;
+  const cardIds = list.cards.map((c) => c.id);
 
   function handleDeleteList() {
     setMenuOpen(false);
@@ -41,9 +45,19 @@ export function BoardList({
     >
       <div className="flex shrink-0 items-start justify-between gap-2 px-3 pt-3">
         <h2 className="min-h-5 min-w-0 flex-1 text-sm font-semibold tracking-tight text-white">
-          {list.title?.trim() ? list.title : "\u00a0"}
+          {list.title?.trim() || ""}
         </h2>
         <div className="relative flex shrink-0 items-center gap-0.5 text-white/70">
+          {columnDragListeners ? (
+            <button
+              type="button"
+              className="cursor-grab touch-manipulation rounded p-1 active:cursor-grabbing hover:bg-white/10 hover:text-white"
+              aria-label="Переместить колонку"
+              {...columnDragListeners}
+            >
+              <MdDragIndicator size={18} />
+            </button>
+          ) : null}
           <button
             type="button"
             className="rounded p-1 hover:bg-white/10 hover:text-white"
@@ -89,25 +103,32 @@ export function BoardList({
 
       {!collapsed ? (
         <>
-          <div className="mt-2 max-h-[min(70dvh,calc(100dvh-7rem))] min-h-0 flex flex-col gap-2 overflow-y-auto px-2 pb-2">
-            {list.cards.map((card) => (
-              <BoardCard
-                key={card.id}
-                card={card}
-                listId={list.id}
-                onDelete={
-                  card.kind === "text"
-                    ? (cardId) => onDeleteCard(list.id, cardId)
-                    : undefined
-                }
-                onOpenCard={onOpenCard}
-              />
-            ))}
-          </div>
+          <SortableContext
+            items={cardIds}
+            strategy={verticalListSortingStrategy}
+          >
+            <div className="mt-2 flex max-h-[min(70dvh,calc(100dvh-7rem))] min-h-12 flex-col gap-2 overflow-y-auto px-2 pb-2">
+              {list.cards.map((card) => (
+                <SortBoardCard
+                  key={card.id}
+                  card={card}listId={list.id}
+                  onDelete={
+                    card.kind === "text"
+                      ? (cardId) => onDeleteCard(list.id, cardId)
+                      : undefined
+                  }
+                  onOpenCard={onOpenCard}
+                />
+              ))}
+            </div>
+          </SortableContext>
 
           <div className="shrink-0 px-2 pb-3">
             {composing ? (
-              <div className="rounded-lg bg-black/25 p-2 ring-1 ring-white/10">
+              <div
+                className="rounded-lg bg-black/25 p-2 ring-1 ring-white/10"
+                onPointerDown={(e) => e.stopPropagation()}
+              >
                 <CardFormField
                   key={composerKey}
                   submitLabel="Добавить"
@@ -115,7 +136,7 @@ export function BoardList({
                   onSubmit={(data) => {
                     onAddCard(list.id, data);
                     setComposing(false);
-}}
+                  }}
                   onCancel={() => setComposing(false)}
                 />
               </div>

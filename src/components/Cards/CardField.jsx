@@ -1,8 +1,8 @@
 import { useRef, useState } from "react";
 import { IoClose, IoImageOutline } from "react-icons/io5";
-import { readFilesAsDataUrls } from "../../utils/readFilesAsDataUrls";
+import { FilesAsDataUrls } from "../../utils/FilesAsDataUrls";
 
-export function CardFormFields({
+export function CardFormField({
   initialTitle = "",
   initialDescription = "",
   initialImages = [],
@@ -22,7 +22,7 @@ export function CardFormFields({
     if (!files?.length) return;
     setBusy(true);
     try {
-      const urls = await readFilesAsDataUrls(files);
+      const urls = await FilesAsDataUrls(files);
       setImages((prev) => [...prev, ...urls]);
     } finally {
       setBusy(false);

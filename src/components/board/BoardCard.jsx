@@ -58,6 +58,7 @@ export function BoardCard({ card, listId, onDelete, onOpenCard }) {
         <button
           type="button"
           className="mt-2 flex w-full items-center justify-center gap-1.5 rounded-md border border-white/10 bg-white/5 py-1.5 text-xs font-medium text-[#579dff] transition hover:bg-white/10"
+          onPointerDown={(e) => e.stopPropagation()}
           onClick={openEdit}
         >
           <IoCreateOutline size={14} aria-hidden />
@@ -69,6 +70,7 @@ export function BoardCard({ card, listId, onDelete, onOpenCard }) {
             type="button"
             className="absolute right-1 top-2 flex h-6 w-6 items-center justify-center rounded text-white/50 opacity-0 pointer-events-none transition hover:bg-white/10 hover:text-white group-hover/card:pointer-events-auto group-hover/card:opacity-100"
             aria-label="Удалить карточку"
+            onPointerDown={(e) => e.stopPropagation()}
             onClick={(e) => {
               e.stopPropagation();
               onDelete(card.id);
@@ -102,13 +104,13 @@ export function BoardCard({ card, listId, onDelete, onOpenCard }) {
   if (card.kind === "thumb") {
     return (
       <div className="cursor-pointer overflow-hidden rounded-lg bg-[#22272b] shadow-none ring-1 ring-white/5 transition hover:bg-[#282e33]">
-        <div
+
+
+<div
           className="aspect-video w-full"
           style={{ background: card.cover }}
         />
-
-
-<div className="flex items-center justify-between gap-2 px-3 py-2">
+        <div className="flex items-center justify-between gap-2 px-3 py-2">
           <p className="text-sm font-medium text-white">{card.title}</p>
           <div className="flex shrink-0 items-center gap-1 text-xs text-white/50">
             <IoDocumentAttachOutline size={14} />

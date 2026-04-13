@@ -10,6 +10,7 @@ export function BoardShell({
   onAddList,
   onDeleteList,
   onOpenCard,
+  onDragEnd,
 }) {
   const showTitle = Boolean(title?.trim());
 
@@ -38,6 +39,7 @@ export function BoardShell({
           onAddList={onAddList}
           onDeleteList={onDeleteList}
           onOpenCard={onOpenCard}
+          onDragEnd = {onDragEnd}
         />
       </div>
     </div>

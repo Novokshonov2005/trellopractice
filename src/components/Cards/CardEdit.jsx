@@ -1,5 +1,5 @@
 import { useEffect, useRef } from "react";
-import { CardFormFields } from "./CardFormFields";
+import { CardFormField } from "../Cards/CardField";
 
 export function CardEditModal({ card, onSave, onClose }) {
   const panelRef = useRef(null);
@@ -36,7 +36,7 @@ export function CardEditModal({ card, onSave, onClose }) {
         <h2 id="card-edit-title" className="mb-4 text-lg font-semibold text-white">
           Редактирование карточки
         </h2>
-        <CardFormFields
+        <CardFormField
           key={card.id}
           initialTitle={card.title}
           initialDescription={card.description ?? ""}
