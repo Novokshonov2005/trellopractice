@@ -3,6 +3,11 @@ import { AppHeader } from "./components/header/AppHeader";
 import { Wrapper } from "./components/wrapper";
 import { BoardPage } from "./pages/BoardPage";
 import { HomePage } from "./pages/HomePage";
+import { AuthGuestLayout } from "./components/Auth/AuthGuestLayout";
+import { AuthPrivateLayout } from "./components/Auth/AuthPrivateLayout";
+import { LoginPage } from "./pages/LoginPage";
+import { RegisterPage } from "./pages/RegisterPage";
+import { AuthProvider } from "./components/AuthContext";
 
 function BoardRoute() {
   const { boardId } = useParams();
@@ -11,17 +16,34 @@ function BoardRoute() {
 
 function App() {
   return (
-    <BrowserRouter>
-      <Wrapper className="flex min-h-screen flex-col">
-        <AppHeader />
-        <main className="flex min-h-0 flex-1 flex-col">
+    <AuthProvider>
+      <BrowserRouter>
+        <Wrapper className="flex min-h-screen flex-col">
           <Routes>
-            <Route path="/" element={<HomePage />} />
-            <Route path="/board/:boardId" element={<BoardRoute />} />
+            <Route
+              path="/login"
+              element={
+                <AuthGuestLayout>
+                  <LoginPage />
+                </AuthGuestLayout>
+              }
+            />
+            <Route
+              path="/register"
+              element={
+                <AuthGuestLayout>
+                  <RegisterPage />
+                </AuthGuestLayout>
+              }
+            />
+            <Route path="/" element={<AuthPrivateLayout />}>
+              <Route index element={<HomePage />} />
+              <Route path="board/:boardId" element={<BoardRoute />} />
+            </Route>
           </Routes>
-        </main>
-      </Wrapper>
-    </BrowserRouter>
+        </Wrapper>
+      </BrowserRouter>
+    </AuthProvider>
   );
 }
 
