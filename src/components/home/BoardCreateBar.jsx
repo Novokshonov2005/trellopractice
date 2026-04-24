@@ -1,10 +1,13 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { defaultLists, defaultMembers } from "../../data/boardDefault";
+import { useDispatch } from "react-redux";
+import { createBoard } from "../../slices/boardSlice";
 
 export function BoardCreateBar() {
   const [title, setTitle] = useState("");
   const navigate = useNavigate();
+  const dispatch = useDispatch();
   const trimmed = title.trim();
   const canSubmit = trimmed.length > 0;
 
@@ -15,16 +18,8 @@ export function BoardCreateBar() {
       typeof crypto !== "undefined" && crypto.randomUUID
         ? crypto.randomUUID()
         : `b-${Date.now()}`;
-    navigate(`/board/${id}`, {
-      state: {
-        board: {
-          id,
-          title: trimmed,
-          lists: defaultLists(),
-          members: defaultMembers(),
-        },
-      },
-    });
+    dispatch(createBoard({ id, title: trimmed }));
+    navigate(`/board/${id}`);
   }
 
   return (

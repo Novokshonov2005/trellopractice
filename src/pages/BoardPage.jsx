@@ -1,30 +1,25 @@
 import { useCallback, useState } from "react";
-import { useLocation, useParams } from "react-router-dom";
-import { reorderListsFromDrag } from "../components/board/BoardDragHandler";
 import { BoardShell } from "../components/board/BoardShell";
 import { CardEditModal } from "../components/Cards/CardEdit";
-import { defaultLists } from "../data/boardDefault";
-import { newId } from "../utils/newId";
-
-function buildBoard(boardId, stateBoard) {
-  if (stateBoard && stateBoard.id === boardId) {
-    return {
-      title: stateBoard.title ?? "",
-      lists: stateBoard.lists?.length ? stateBoard.lists : defaultLists(),
-    };
-  }
-  return {
-    title: "",
-    lists: defaultLists(),
-  };
-}
+import { useDispatch, useSelector } from "react-redux";
+import { useParams } from "react-router-dom";
+import {
+  addCard,
+  addList,
+  applyDragResult,
+  deleteCard,
+  deleteList,
+  selectBoardById,
+  updateCard,
+} from "../slices/boardSlice";
 
 export function BoardPage() {
+  const dispatch = useDispatch();
   const { boardId } = useParams();
-  const location = useLocation();
-  const initial = buildBoard(boardId ?? "demo", location.state?.board);
-  const [lists, setLists] = useState(initial.lists);
-  const { title } = initial;
+  const currentBoardId = boardId ?? "";
+  const board = useSelector((state) => selectBoardById(state, currentBoardId));
+  const lists = board?.lists ?? [];
+  const title = board?.title ?? "";
   const [editTarget, setEditTarget] = useState(null);
 
   const cardBeingEdited =
@@ -34,90 +29,58 @@ export function BoardPage() {
           ?.cards.find((c) => c.id === editTarget.cardId) ?? null)
       : null;
 
-  function handleAddCard(listId, { title: cardTitle, description, images }) {
+   function handleAddCard(listId, { title: cardTitle, description, images }) {
+    if (!board) return;
     const t = cardTitle.trim();
     if (!t) return;
-    setLists((prev) =>
-      prev.map((l) =>
-        l.id === listId
-          ? {
-              ...l,
-              cards: [
-                ...l.cards,
-                {
-                  id: newId(),
-                  kind: "text",
-                  title: t,
-                  description: (description ?? "").trim(),
-                  images: Array.isArray(images) ? [...images] : [],
-                },
-              ],
-            }
-          : l,
-      ),
+    dispatch(
+      addCard({
+        boardId: currentBoardId,
+        listId,
+        title: t,
+        description,
+        images,
+      }),
     );
   }
 
-  function handleUpdateCard(listId, cardId, payload) {
-    setLists((prev) =>
-      prev.map((l) =>
-        l.id !== listId
-          ? l
-          : {
-              ...l,
-              cards: l.cards.map((c) =>
-                c.id !== cardId
-                  ? c
-                  : {
-                      ...c,
-                      title: payload.title,
-                      description: payload.description,
-                      images: payload.images,
-                    },
-              ),
-            },
-      ),
-    );
+ function handleUpdateCard(listId, cardId, payload) {
+    dispatch(updateCard({ boardId: currentBoardId, listId, cardId, payload }));
     setEditTarget(null);
   }
 
   function handleDeleteCard(listId, cardId) {
-    setLists((prev) =>
-      prev.map((l) =>
-        l.id === listId
-          ? { ...l, cards: l.cards.filter((c) => c.id !== cardId) }
-          : l,
-      ),
-    );
+    dispatch(deleteCard({ boardId: currentBoardId, listId, cardId }));
     setEditTarget((cur) =>
       cur?.listId === listId && cur?.cardId === cardId ? null : cur,
     );
   }
 
   function handleDeleteList(listId) {
-    setLists((prev) => prev.filter((l) => l.id !== listId));
+    dispatch(deleteList({ boardId: currentBoardId, listId }));
     setEditTarget((cur) => (cur?.listId === listId ? null : cur));
   }
 
   function handleAddList() {
+    if (!board) return;
     const raw = window.prompt("Название колонки", "");
     if (raw === null) return;
     const columnTitle = raw.trim();
-    setLists((prev) => [
-      ...prev,
-      {
-        id: newId(),
-        title: columnTitle,
-        tint: "board",
-        cards: [],
-      },
-    ]);
+    if (!columnTitle) return;
+    dispatch(addList({ boardId: currentBoardId, title: columnTitle }));
   }
 
-  const handleDragEnd = useCallback((event) => {
-    setLists((prev) => reorderListsFromDrag(event, prev) ?? prev);
-  }, []);
+  function handleDragEnd(event) {
+    dispatch(applyDragResult({ boardId: currentBoardId, event }));
+  }
 
+  if (!board) {
+    return (
+      <div className="flex flex-1 items-center justify-center p-6 text-white">
+        Доска не найдена
+      </div>
+    );
+  }
   return (
     <>
       <BoardShell
