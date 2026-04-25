@@ -4,13 +4,13 @@ import { CardEditModal } from "../components/Cards/CardEdit";
 import { useDispatch, useSelector } from "react-redux";
 import { useParams } from "react-router-dom";
 import {
-  addCard,
-  addList,
-  applyDragResult,
-  deleteCard,
-  deleteList,
+  addCardAsync,
+  addListAsync,
+  applyDragResultAsync,
+  deleteCardAsync,
+  deleteListAsync,
   selectBoardById,
-  updateCard,
+  updateCardAsync,
 } from "../slices/boardSlice";
 
 export function BoardPage() {
@@ -21,57 +21,70 @@ export function BoardPage() {
   const lists = board?.lists ?? [];
   const title = board?.title ?? "";
   const [editTarget, setEditTarget] = useState(null);
+  const [listModalOpen, setListModalOpen] = useState(false);
+  const [newListTitle, setNewListTitle] = useState("");
 
   const cardBeingEdited =
     editTarget != null
-      ? (lists
+      ? lists
           .find((l) => l.id === editTarget.listId)
-          ?.cards.find((c) => c.id === editTarget.cardId) ?? null)
+          ?.cards.find((c) => c.id === editTarget.cardId) ?? null
       : null;
 
-   function handleAddCard(listId, { title: cardTitle, description, images }) {
+  function handleAddCard(listId, { title: cardTitle, description, dueDate, images }) {
     if (!board) return;
     const t = cardTitle.trim();
     if (!t) return;
     dispatch(
-      addCard({
+      addCardAsync({
         boardId: currentBoardId,
         listId,
         title: t,
         description,
+        dueDate,
         images,
       }),
     );
   }
 
- function handleUpdateCard(listId, cardId, payload) {
-    dispatch(updateCard({ boardId: currentBoardId, listId, cardId, payload }));
+  function handleUpdateCard(listId, cardId, payload) {
+    dispatch(updateCardAsync({ boardId: currentBoardId, listId, cardId, payload }));
     setEditTarget(null);
   }
 
   function handleDeleteCard(listId, cardId) {
-    dispatch(deleteCard({ boardId: currentBoardId, listId, cardId }));
+    dispatch(deleteCardAsync({ boardId: currentBoardId, listId, cardId }));
     setEditTarget((cur) =>
       cur?.listId === listId && cur?.cardId === cardId ? null : cur,
     );
   }
 
   function handleDeleteList(listId) {
-    dispatch(deleteList({ boardId: currentBoardId, listId }));
+    dispatch(deleteListAsync({ boardId: currentBoardId, listId }));
     setEditTarget((cur) => (cur?.listId === listId ? null : cur));
+  }
+
+  function handleCreateList() {
+    const columnTitle = newListTitle.trim();
+    if (!columnTitle) return;
+    dispatch(addListAsync({ boardId: currentBoardId, title: columnTitle }));
+    setNewListTitle("");
+    setListModalOpen(false);
   }
 
   function handleAddList() {
     if (!board) return;
-    const raw = window.prompt("Название колонки", "");
-    if (raw === null) return;
-    const columnTitle = raw.trim();
-    if (!columnTitle) return;
-    dispatch(addList({ boardId: currentBoardId, title: columnTitle }));
+    setListModalOpen(true);
   }
 
   function handleDragEnd(event) {
-    dispatch(applyDragResult({ boardId: currentBoardId, event }));
+    dispatch(
+      applyDragResultAsync({
+        boardId: currentBoardId,
+        activeId: String(event.active.id),
+        overId: event.over ? String(event.over.id) : null,
+      }),
+    );
   }
 
   if (!board) {
@@ -81,6 +94,7 @@ export function BoardPage() {
       </div>
     );
   }
+
   return (
     <>
       <BoardShell
@@ -102,6 +116,52 @@ export function BoardPage() {
             handleUpdateCard(editTarget.listId, editTarget.cardId, payload)
           }
         />
+      ) : null}
+      {listModalOpen ? (
+        <div
+          className="fixed inset-0 z-520 flex items-start justify-center bg-black/55 p-4 pt-20 backdrop-blur-sm"
+          role="presentation"
+          onClick={() => setListModalOpen(false)}
+        >
+          <div
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="new-list-title"
+            className="w-full max-w-md rounded-xl border border-white/15 bg-[#282e33] p-5 shadow-2xl"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <h2 id="new-list-title" className="mb-3 text-lg font-semibold text-white">
+              Новая колонка
+            </h2>
+            <label className="mb-1 block text-xs font-medium text-white/70">
+              Название колонки
+            </label>
+            <input
+              type="text"
+              value={newListTitle}
+              onChange={(e) => setNewListTitle(e.target.value)}
+              className="w-full rounded-md border border-white/15 bg-[#1a1d21] px-2 py-2 text-sm text-white outline-none placeholder:text-white/40 focus:border-[#579dff]/50"
+              placeholder="Например: В работе"
+              autoFocus
+            />
+            <div className="mt-4 flex gap-2">
+              <button
+                type="button"
+                className="rounded-md bg-[#579dff] px-4 py-2 text-sm font-semibold text-white hover:bg-[#6cabff]"
+                onClick={handleCreateList}
+              >
+                Создать
+              </button>
+              <button
+                type="button"
+                className="rounded-md px-4 py-2 text-sm text-white/80 hover:bg-white/10"
+                onClick={() => setListModalOpen(false)}
+              >
+                Отмена
+              </button>
+            </div>
+          </div>
+        </div>
       ) : null}
     </>
   );

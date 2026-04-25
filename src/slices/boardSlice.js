@@ -1,129 +1,120 @@
-import { createSlice } from "@reduxjs/toolkit";
-import { reorderListsFromDrag } from "../components/board/BoardDragHandler";
-import { defaultLists } from "../data/boardDefault";
-import { newId } from "../utils/newId";
+import { createAsyncThunk, createSelector, createSlice } from "@reduxjs/toolkit";
+import { boardsApi } from "../api/boardsApi";
+
+const initialSnapshot = boardsApi.getSnapshotSync();
 
 const initialState = {
-  entities: {},
-  recentIds: [],
-  favoriteIds: [],
+  ...initialSnapshot,
+  status: "idle",
+  error: null,
 };
+
+export const createBoardAsync = createAsyncThunk(
+  "boards/createBoardAsync",
+  async (payload) => boardsApi.createBoard(payload),
+);
+export const addListAsync = createAsyncThunk("boards/addListAsync", async (payload) =>
+  boardsApi.addList(payload),
+);
+export const deleteListAsync = createAsyncThunk(
+  "boards/deleteListAsync",
+  async (payload) => boardsApi.deleteList(payload),
+);
+export const addCardAsync = createAsyncThunk("boards/addCardAsync", async (payload) =>
+  boardsApi.addCard(payload),
+);
+export const updateCardAsync = createAsyncThunk(
+  "boards/updateCardAsync",
+  async (payload) => boardsApi.updateCard(payload),
+);
+export const deleteCardAsync = createAsyncThunk(
+  "boards/deleteCardAsync",
+  async (payload) => boardsApi.deleteCard(payload),
+);
+export const applyDragResultAsync = createAsyncThunk(
+  "boards/applyDragResultAsync",
+  async (payload) => boardsApi.applyDrag(payload),
+);
+export const touchRecentAsync = createAsyncThunk(
+  "boards/touchRecentAsync",
+  async (payload) => boardsApi.touchRecent(payload),
+);
+export const toggleFavoriteAsync = createAsyncThunk(
+  "boards/toggleFavoriteAsync",
+  async (payload) => boardsApi.toggleFavorite(payload),
+);
 
 const boardsSlice = createSlice({
   name: "boards",
   initialState,
-  reducers: {
-    createBoard(state, action) {
-      const { id, title } = action.payload;
-      state.entities[id] = {
-        id,
-        title: title?.trim() || "",
-        lists: defaultLists(),
-      };
-      state.recentIds = [id, ...state.recentIds.filter((item) => item !== id)].slice(0,8);
-    },
-    deleteList(state, action) {
-      const { boardId, listId } = action.payload;
-      const board = state.entities[boardId];
-      if (!board) return;
-      board.lists = board.lists.filter((l) => l.id !== listId);
-    },
-    addList(state, action) {
-      const { boardId, title } = action.payload;
-      const board = state.entities[boardId];
-      if (!board) return;
-      board.lists.push({
-        id: newId(),
-        title: title.trim(),
-        tint: "board",
-        cards: [],
-      });
-    },
-    addCard(state, action) {
-      const { boardId, listId, title, description, images } = action.payload;
-      const board = state.entities[boardId];
-      if (!board) return;
-      const list = board.lists.find((l) => l.id === listId);
-      if (!list) return;
-      list.cards.push({
-        id: newId(),
-        kind: "text",
-        title: title.trim(),
-        description: (description ?? "").trim(),
-        images: Array.isArray(images) ? [...images] : [],
-      });
-    },
-    updateCard(state, action) {
-      const { boardId, listId, cardId, payload } = action.payload;
-      const board = state.entities[boardId];
-      if (!board) return;
-      const list = board.lists.find((l) => l.id === listId);
-      if (!list) return;
-      const card = list.cards.find((c) => c.id === cardId);
-      if (!card) return;
-      card.title = payload.title;
-      card.description = payload.description;
-      card.images = payload.images;
-    },
-    deleteCard(state, action) {
-      const { boardId, listId, cardId } = action.payload;
-      const board = state.entities[boardId];
-      if (!board) return;
-      const list = board.lists.find((l) => l.id === listId);
-      if (!list) return;
-      list.cards = list.cards.filter((c) => c.id !== cardId);
-    },
-    applyDragResult(state, action) {
-      const { boardId, event } = action.payload;
-      const board = state.entities[boardId];
-      if (!board) return;
-      const next = reorderListsFromDrag(event, board.lists);
-      if (next) {
-        board.lists = next;
-      }
-    },
-    touchRecent(state, action) {
-      const { boardId } = action.payload;
-      if (!state.entities[boardId]) return;
-      state.recentIds = [boardId, ...state.recentIds.filter((id) => id !== boardId)].slice(0,8);
-    },
-    toggleFavorite(state, action) {
-      const { boardId } = action.payload;
-      if (!state.entities[boardId]) return;
-      if (state.favoriteIds.includes(boardId)) {
-        state.favoriteIds = state.favoriteIds.filter((id) => id !== boardId);
-        return;
-      }
-      state.favoriteIds = [...state.favoriteIds, boardId];
-    },
+  reducers: {},
+  extraReducers: (builder) => {
+    const pending = (state) => {
+      state.status = "loading";
+      state.error = null;
+    };
+    const rejected = (state, action) => {
+      state.status = "failed";
+      state.error = action.error?.message || "Ошибка операции";
+    };
+    const fulfilled = (state, action) => {
+      state.status = "succeeded";
+      state.error = null;
+      state.entities = action.payload.entities;
+      state.recentIds = action.payload.recentIds;
+      state.favoriteIds = action.payload.favoriteIds;
+    };
+
+    builder
+      .addCase(createBoardAsync.pending, pending)
+      .addCase(createBoardAsync.rejected, rejected)
+      .addCase(createBoardAsync.fulfilled, fulfilled)
+      .addCase(addListAsync.pending, pending)
+      .addCase(addListAsync.rejected, rejected)
+      .addCase(addListAsync.fulfilled, fulfilled)
+      .addCase(deleteListAsync.pending, pending)
+      .addCase(deleteListAsync.rejected, rejected)
+      .addCase(deleteListAsync.fulfilled, fulfilled)
+      .addCase(addCardAsync.pending, pending)
+      .addCase(addCardAsync.rejected, rejected)
+      .addCase(addCardAsync.fulfilled, fulfilled)
+      .addCase(updateCardAsync.pending, pending)
+      .addCase(updateCardAsync.rejected, rejected)
+      .addCase(updateCardAsync.fulfilled, fulfilled)
+      .addCase(deleteCardAsync.pending, pending)
+      .addCase(deleteCardAsync.rejected, rejected)
+      .addCase(deleteCardAsync.fulfilled, fulfilled)
+      .addCase(applyDragResultAsync.pending, pending)
+      .addCase(applyDragResultAsync.rejected, rejected)
+      .addCase(applyDragResultAsync.fulfilled, fulfilled)
+      .addCase(touchRecentAsync.pending, pending)
+      .addCase(touchRecentAsync.rejected, rejected)
+      .addCase(touchRecentAsync.fulfilled, fulfilled)
+      .addCase(toggleFavoriteAsync.pending, pending)
+      .addCase(toggleFavoriteAsync.rejected, rejected)
+      .addCase(toggleFavoriteAsync.fulfilled, fulfilled);
   },
 });
-
-export const {
-  createBoard,
-  deleteList,
-  addList,
-  addCard,
-  updateCard,
-  deleteCard,
-  applyDragResult,
-  touchRecent,
-  toggleFavorite,
-} = boardsSlice.actions;
 
 export const selectBoardById = (state, boardId) =>
   state.boards.entities[boardId] ?? null;
 
-export const selectAllBoards = (state) => Object.values(state.boards.entities);
+const selectBoardEntities = (state) => state.boards.entities;
+const selectRecentIds = (state) => state.boards.recentIds;
+const selectFavoriteIds = (state) => state.boards.favoriteIds;
 
-export const selectRecentBoards = (state) =>
-  state.boards.recentIds
-    .map((id) => state.boards.entities[id])
-    .filter(Boolean);
+export const selectAllBoards = createSelector([selectBoardEntities], (entities) =>
+  Object.values(entities),
+);
 
-export const selectFavoriteBoards = (state) =>
-  state.boards.favoriteIds
-    .map((id) => state.boards.entities[id])
-    .filter(Boolean);
+export const selectRecentBoards = createSelector(
+  [selectRecentIds, selectBoardEntities],
+  (recentIds, entities) => recentIds.map((id) => entities[id]).filter(Boolean),
+);
+
+export const selectFavoriteBoards = createSelector(
+  [selectFavoriteIds, selectBoardEntities],
+  (favoriteIds, entities) => favoriteIds.map((id) => entities[id]).filter(Boolean),
+);
 
 export default boardsSlice.reducer;

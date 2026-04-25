@@ -5,8 +5,8 @@ import {
   selectAllBoards,
   selectFavoriteBoards,
   selectRecentBoards,
-  toggleFavorite,
-  touchRecent,
+  toggleFavoriteAsync,
+  touchRecentAsync,
 } from "../../slices/boardSlice";
 
 const dropLink =
@@ -19,14 +19,9 @@ export function MainNav() {
   const allBoards = useSelector(selectAllBoards);
   const recentBoards = useSelector(selectRecentBoards);
   const favoriteBoards = useSelector(selectFavoriteBoards);
-  const visibleBoards = allBoards.filter((board) => board.id !== "demo");
-  const visibleRecentBoards = recentBoards.filter((board) => board.id !== "demo");
-  const visibleFavoriteBoards = favoriteBoards.filter(
-    (board) => board.id !== "demo",
-  );
 
   function openBoard(boardId) {
-    dispatch(touchRecent({ boardId }));
+    dispatch(touchRecentAsync({ boardId }));
   }
 
   return (
@@ -71,7 +66,7 @@ export function MainNav() {
                   className={starBtn}
                   onClick={(e) => {
                     e.stopPropagation();
-                    dispatch(toggleFavorite({ boardId: board.id }));
+                    dispatch(toggleFavoriteAsync({ boardId: board.id }));
                   }}
                 >
                   {isFav ? "+" : "-"}

@@ -2,7 +2,7 @@ import { IoSearchOutline } from "react-icons/io5";
 import { useMemo, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { Link } from "react-router-dom";
-import { selectAllBoards, touchRecent } from "../../slices/boardSlice"
+import { selectAllBoards, touchRecentAsync } from "../../slices/boardSlice"
 
 const inputClass =
   "w-full rounded border border-white/10 bg-[#22272b] py-2 pl-9 pr-3 text-sm text-white placeholder:text-white/40 outline-none transition focus:border-[#579dff]/50 focus:ring-1 focus:ring-[#579dff]";
@@ -47,7 +47,7 @@ export function BoardSearch({ className = "" }) {
                 to={`/board/${board.id}`}
                 className={resultLinkClass}
                 onClick={() => {
-                  dispatch(touchRecent({ boardId: board.id }));
+                  dispatch(touchRecentAsync({ boardId: board.id }));
                   setQuery("");
                 }}
               >
