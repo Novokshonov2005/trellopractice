@@ -82,9 +82,32 @@ export function AuthProvider({ children }) {
     setUser(null);
   }, []);
 
+   const changePassword = useCallback((currentPassword, nextPassword) => {
+    if (!user?.email) {
+      return { ok: false, error: "Пользователь не авторизован." };
+    }
+    if (!currentPassword) {
+      return { ok: false, error: "Введите текущий пароль." };
+    }
+    if (!nextPassword || nextPassword.length < 6) {
+      return { ok: false, error: "Новый пароль не короче 6 символов." };
+    }
+    const users = readUsers();
+    const index = users.findIndex((u) => u.email === user.email);
+    if (index === -1) {
+      return { ok: false, error: "Пользователь не найден." };
+    }
+    if (users[index].password !== currentPassword) {
+      return { ok: false, error: "Текущий пароль неверный." };
+    }
+    users[index] = { ...users[index], password: nextPassword };
+    writeUsers(users);
+    return { ok: true };
+  }, [user]);
+
   const value = useMemo(
-    () => ({ user, login, register, logout }),
-    [user, login, register, logout],
+    () => ({ user, login, register, logout, changePassword }),
+    [user, login, register, logout, changePassword],
   );
 
   return (

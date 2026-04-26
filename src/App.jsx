@@ -8,6 +8,7 @@ import { AuthPrivateLayout } from "./components/Auth/AuthPrivateLayout";
 import { LoginPage } from "./pages/LoginPage";
 import { RegisterPage } from "./pages/RegisterPage";
 import { AuthProvider } from "./components/AuthContext";
+import { ProfilePage } from "./pages/ProfilePage";
 
 function BoardRoute() {
   const { boardId } = useParams();
@@ -39,6 +40,7 @@ function App() {
             <Route path="/" element={<AuthPrivateLayout />}>
               <Route index element={<HomePage />} />
               <Route path="board/:boardId" element={<BoardRoute />} />
+              <Route path="profile" element={<ProfilePage />} />
             </Route>
           </Routes>
         </Wrapper>

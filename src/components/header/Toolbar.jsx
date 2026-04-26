@@ -50,8 +50,17 @@ export function UserToolbar() {
       </IconWithTooltip>
       <span className="mx-1 hidden h-6 w-px bg-white/15 sm:block" aria-hidden />
       <div
-        className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[#579dff] text-sm font-semibold text-white"
+       role="button"
+       tabIndex={0}
+        className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[#579dff] text-sm font-semibold text-white cursor-pointer"
         title={user?.email ?? "Профиль"}
+        onClick={() => navigate("/profile")}
+        onKeyDown={(e) => {
+          if (e.key === "Enter" || e.key === " ") {
+            e.preventDefault();
+            navigate("/profile");
+          }
+        }}
       >
         {initial}
       </div>
