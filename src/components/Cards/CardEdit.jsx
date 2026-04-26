@@ -41,6 +41,7 @@ export function CardEditModal({ card, onSave, onClose }) {
           initialTitle={card.title}
           initialDescription={card.description ?? ""}
           initialImages={[...(card.images ?? [])]}
+          initialDueDate={card.dueDate ?? ""}
           submitLabel="Сохранить"
           onSubmit={onSave}
           onCancel={onClose}

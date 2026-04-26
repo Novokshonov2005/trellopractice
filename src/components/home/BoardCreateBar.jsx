@@ -1,6 +1,5 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { defaultLists, defaultMembers } from "../../data/boardDefault";
 import { useDispatch } from "react-redux";
 import { createBoardAsync } from "../../slices/boardSlice";
 
@@ -11,7 +10,7 @@ export function BoardCreateBar() {
   const trimmed = title.trim();
   const canSubmit = trimmed.length > 0;
 
-  function handleSubmit(e) {
+  async function handleSubmit(e) {
     e.preventDefault();
     if (!canSubmit) return;
     const id =

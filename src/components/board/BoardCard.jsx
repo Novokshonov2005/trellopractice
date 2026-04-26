@@ -10,6 +10,7 @@ export function BoardCard({ card, listId, onDelete, onOpenCard }) {
   if (card.kind === "text") {
     const desc = card.description?.trim();
     const images = Array.isArray(card.images) ? card.images : [];
+    const dueDate = typeof card.dueDate === "string" ? card.dueDate : "";
     const preview = images.slice(0, 4);
     const extra = images.length - preview.length;
 
@@ -35,6 +36,11 @@ export function BoardCard({ card, listId, onDelete, onOpenCard }) {
           <span className="block font-medium">{card.title}</span>
           {desc ? (
             <p className="mt-1 line-clamp-3 text-xs text-white/65">{desc}</p>
+          ) : null}
+          {dueDate ? (
+            <p className="mt-1 text-[11px] font-medium text-amber-300/90">
+              Срок: {dueDate}
+            </p>
           ) : null}
           {preview.length > 0 ? (
             <div className="mt-2 flex gap-1 overflow-x-auto pb-0.5">

@@ -5,6 +5,7 @@ import { FilesAsDataUrls } from "../../utils/FilesAsDataUrls";
 export function CardFormField({
   initialTitle = "",
   initialDescription = "",
+  initialDueDate = "",
   initialImages = [],
   submitLabel = "Сохранить",
   autoFocusTitle = false,
@@ -13,6 +14,7 @@ export function CardFormField({
 }) {
   const [title, setTitle] = useState(initialTitle);
   const [description, setDescription] = useState(initialDescription);
+  const [dueDate, setDueDate] = useState(initialDueDate);
   const [images, setImages] = useState(() => [...initialImages]);
   const [busy, setBusy] = useState(false);
   const fileRef = useRef(null);
@@ -22,7 +24,7 @@ export function CardFormField({
     if (!files?.length) return;
     setBusy(true);
     try {
-      const urls = await FilesAsDataUrls(files);
+      const urls = await readFilesAsDataUrls(files);
       setImages((prev) => [...prev, ...urls]);
     } finally {
       setBusy(false);
@@ -41,6 +43,7 @@ export function CardFormField({
     onSubmit({
       title: t,
       description: description.trim(),
+      dueDate: dueDate || "",
       images: [...images],
     });
   }
@@ -74,6 +77,17 @@ export function CardFormField({
       </div>
       <div>
         <label className="mb-1 block text-xs font-medium text-white/70">
+          Срок выполнения
+        </label>
+        <input
+          type="date"
+          value={dueDate}
+          onChange={(e) => setDueDate(e.target.value)}
+          className="w-full rounded-md border border-white/15 bg-[#1a1d21] px-2 py-2 text-sm text-white outline-none placeholder:text-white/40 focus:border-[#579dff]/50"
+        />
+      </div>
+      <div>
+        <label className="mb-1 block text-xs font-medium text-white/70">
           Картинки (можно выбрать несколько раз)
         </label>
         <input
@@ -96,11 +110,12 @@ export function CardFormField({
         {images.length > 0 ? (
           <ul className="mt-2 grid max-h-48 grid-cols-3 gap-2 overflow-y-auto sm:grid-cols-4">
             {images.map((src, i) => (
-              <li
-                key={`${i}-${src.slice(0, 32)}`}
-                className="group/img relative aspect-square overflow-hidden rounded-md ring-1 ring-white/10"
-              >
-                <img src={src} alt="" className="h-full w-full object-cover" />
+              <li key={`${i}-${src.slice(0, 32)}`} className="group/img relative aspect-square overflow-hidden rounded-md ring-1 ring-white/10">
+                <img
+                  src={src}
+                  alt=""
+                  className="h-full w-full object-cover"
+                />
                 <button
                   type="button"
                   className="absolute right-0.5 top-0.5 flex h-6 w-6 items-center justify-center rounded bg-black/60 text-white opacity-0 transition group-hover/img:opacity-100 hover:bg-black/80"
