@@ -24,7 +24,7 @@ export function CardFormField({
     if (!files?.length) return;
     setBusy(true);
     try {
-      const urls = await readFilesAsDataUrls(files);
+      const urls = await FilesAsDataUrls(files);
       setImages((prev) => [...prev, ...urls]);
     } finally {
       setBusy(false);

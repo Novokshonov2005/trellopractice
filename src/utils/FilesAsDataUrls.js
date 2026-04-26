@@ -7,7 +7,7 @@ export function FilesAsDataUrls(fileList) {
           const reader = new FileReader();
           reader.onload = () => resolve(reader.result);
           reader.onerror = () => reject(reader.error);
-          reader.readAsDataURl(file);
+          reader.readAsDataURL(file);
         }),
     ),
   );
