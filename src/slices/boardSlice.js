@@ -13,6 +13,10 @@ export const createBoardAsync = createAsyncThunk(
   "boards/createBoardAsync",
   async (payload) => boardsApi.createBoard(payload),
 );
+export const deleteBoardAsync = createAsyncThunk(
+  "boards/deleteBoardAsync",
+  async (payload) => boardsApi.deleteBoard(payload),
+);
 export const addListAsync = createAsyncThunk("boards/addListAsync", async (payload) =>
   boardsApi.addList(payload),
 );
@@ -69,6 +73,9 @@ const boardsSlice = createSlice({
       .addCase(createBoardAsync.pending, pending)
       .addCase(createBoardAsync.rejected, rejected)
       .addCase(createBoardAsync.fulfilled, fulfilled)
+      .addCase(deleteBoardAsync.pending, pending)
+      .addCase(deleteBoardAsync.rejected, rejected)
+      .addCase(deleteBoardAsync.fulfilled, fulfilled)
       .addCase(addListAsync.pending, pending)
       .addCase(addListAsync.rejected, rejected)
       .addCase(addListAsync.fulfilled, fulfilled)

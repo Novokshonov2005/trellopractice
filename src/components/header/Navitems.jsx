@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
-import ArrowDownIcon from "../assets/icon-arrow-down.svg";
-import ArrowUpIcon from "../assets/icon-arrow-up.svg";
+import ArrowDownIcon from "../../assets/icon-arrow-down.svg";
+import ArrowUpIcon from "../../assets/icon-arrow-up.svg";
 
 export const Navbar = ({
   text = "",

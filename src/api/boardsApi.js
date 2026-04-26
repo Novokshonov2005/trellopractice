@@ -53,6 +53,13 @@ function createBoardMutation(state, { id, title }) {
   touchRecent(state, id);
 }
 
+function deleteBoardMutation(state, { boardId }) {
+  if (!state.entities[boardId]) return;
+  delete state.entities[boardId];
+  state.recentIds = state.recentIds.filter((id) => id !== boardId);
+  state.favoriteIds = state.favoriteIds.filter((id) => id !== boardId);
+}
+
 function addListMutation(state, { boardId, title }) {
   const board = state.entities[boardId];
   if (!board) return;
@@ -141,6 +148,9 @@ export const boardsApi = {
   },
   createBoard(payload) {
     return mutateAndPersist((state) => createBoardMutation(state, payload));
+  },
+  deleteBoard(payload) {
+    return mutateAndPersist((state) => deleteBoardMutation(state, payload));
   },
   addList(payload) {
     return mutateAndPersist((state) => addListMutation(state, payload));

@@ -14,7 +14,7 @@ export function SortBoardList(props) {
   } = useSortable({ id: list.id });
 
   const style = {
-    transform: CSS.Transform.toString(transform),
+    transform: CSS.Translate.toString(transform),
     transition,
     opacity: isDragging ? 0.55 : undefined,
     zIndex: isDragging ? 10 : undefined,

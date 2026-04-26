@@ -14,15 +14,15 @@ export function SortBoardCard(props) {
   } = useSortable({ id: card.id });
 
   const style = {
-    transform: CSS.Transform.toString(transform),
+    transform: CSS.Translate.toString(transform),
     transition,
     opacity: isDragging ? 0.45 : undefined,
-    position: isDragging ? "relative" : undefined,
     zIndex: isDragging ? 20 : undefined,
+    with: "100%",
   };
 
   return (
-    <div ref={setNodeRef} style={style} {...attributes} className="relative">
+    <div ref={setNodeRef} style={style} {...attributes} className="relative w-full">
       <div
         {...listeners}
         className="cursor-grab touch-manipulation active:cursor-grabbing"

@@ -1,12 +1,22 @@
 import { useState } from "react";
 import { useAuth } from "../components/AuthContext"
+import { FilesAsDataUrls } from "../utils/FilesAsDataUrls";
 
 export function ProfilePage() {
-  const { user, changePassword } = useAuth();
+  const { user, changePassword, appBackground, setAppBackground } = useAuth();
   const [currentPassword, setCurrentPassword] = useState("");
   const [nextPassword, setNextPassword] = useState("");
   const [nextPassword2, setNextPassword2] = useState("");
   const [status, setStatus] = useState({ type: "", text: "" });
+
+  async function handleBackgroundPick(e) {
+    const { files } = e.target;
+    if (!files?.length) return;
+    const [url] = await FilesAsDataUrls([files[0]]);
+    setAppBackground(typeof url === "string" ? url : "");
+    setStatus({ type: "success", text: "Фон приложения обновлен." });
+    e.target.value = "";
+  }
 
   function handleSubmit(e) {
     e.preventDefault();
@@ -43,6 +53,41 @@ export function ProfilePage() {
           <p className="mt-3 text-[15px] leading-relaxed text-white/80">
             Email: <span className="font-medium text-white">{user?.email}</span>
           </p>
+
+          <section className="mt-6 max-w-lg rounded-xl border border-white/10 bg-black/20 p-4">
+            <h2 className="text-sm font-semibold uppercase tracking-wide text-white/70">
+              Фон приложения
+            </h2>
+            <p className="mt-2 text-sm text-white/70">
+              Можно загрузить свою картинку для заднего фона.
+            </p>
+            <div className="mt-3 flex flex-wrap gap-2">
+              <label className="cursor-pointer rounded-md bg-[#579dff] px-4 py-2 text-sm font-semibold text-white hover:bg-[#6cabff]">
+                Выбрать изображение
+                <input
+                  type="file"
+                  accept="image/*"
+                  className="hidden"
+                  onChange={handleBackgroundPick}
+                />
+              </label>
+              <button
+                type="button"
+                className="rounded-md px-4 py-2 text-sm text-white/85 hover:bg-white/10"
+                onClick={() => {
+                  setAppBackground("");
+                  setStatus({ type: "success", text: "Фон сброшен к стандартному." });
+                }}
+              >
+                Сбросить фон
+              </button>
+            </div>
+            {appBackground ? (
+              <p className="mt-2 text-xs text-white/60">Пользовательский фон активен.</p>
+            ) : (
+              <p className="mt-2 text-xs text-white/60">Используется стандартный фон.</p>
+            )}
+          </section>
 
           <form className="mt-8 flex max-w-lg flex-col gap-4" onSubmit={handleSubmit}>
             {status.text ? (

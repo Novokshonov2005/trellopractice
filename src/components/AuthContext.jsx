@@ -2,6 +2,7 @@ import { createContext, useCallback, useContext, useMemo, useState } from "react
 
 const USERS_KEY = "tenma_users";
 const SESSION_KEY = "tenma_session";
+const APP_BG_KEY = "tenma_app_background";
 
 function readSession() {
   try {
@@ -37,10 +38,27 @@ function writeSession(session) {
   }
 }
 
+function readAppBackground() {
+  try {
+    return localStorage.getItem(APP_BG_KEY) || "";
+  } catch {
+    return "";
+  }
+}
+
+function writeAppBackground(value) {
+  if (value) {
+    localStorage.setItem(APP_BG_KEY, value);
+  } else {
+    localStorage.removeItem(APP_BG_KEY);
+  }
+}
+
 const AuthContext = createContext(null);
 
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(readSession);
+  const [appBackground, setAppBackgroundState] = useState(readAppBackground);
 
   const login = useCallback((email, password) => {
     const normalized = email.trim().toLowerCase();
@@ -82,7 +100,7 @@ export function AuthProvider({ children }) {
     setUser(null);
   }, []);
 
-   const changePassword = useCallback((currentPassword, nextPassword) => {
+  const changePassword = useCallback((currentPassword, nextPassword) => {
     if (!user?.email) {
       return { ok: false, error: "Пользователь не авторизован." };
     }
@@ -105,9 +123,16 @@ export function AuthProvider({ children }) {
     return { ok: true };
   }, [user]);
 
+  const setAppBackground = useCallback((backgroundDataUrl) => {
+    const next = typeof backgroundDataUrl === "string" ? backgroundDataUrl : "";
+    writeAppBackground(next);
+    setAppBackgroundState(next);
+    return { ok: true };
+  }, []);
+
   const value = useMemo(
-    () => ({ user, login, register, logout, changePassword }),
-    [user, login, register, logout, changePassword],
+    () => ({ user, login, register, logout, changePassword, appBackground, setAppBackground }),
+    [user, login, register, logout, changePassword, appBackground, setAppBackground],
   );
 
   return (

@@ -1,6 +1,6 @@
 import { Link } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
-import { Navbar } from "../Navitems";
+import { Navbar } from "./Navitems";
 import {
   selectAllBoards,
   selectFavoriteBoards,
