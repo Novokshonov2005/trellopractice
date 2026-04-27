@@ -1,12 +1,75 @@
-# React + Vite
+# Tenma(Trello-like)
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Упрощенный аналог Trello/Notion на React.
+# Что реализовано
 
-Currently, two official plugins are available:
+- Авторизация и регистрация (без реального бэкенда).
+- Личный кабинет:
+  - смена пароля;
+  - смена фонового изображения приложения.
+- Страница со списком досок.
+- Страница конкретной доски:
+  - создание/удаление колонок;
+  - создание/редактирование/удаление карточек;
+  - описание, срок выполнения, изображения.
+- Drag-and-drop:
+  - перенос колонок;
+  - перенос карточек внутри колонки и между колонками.
+- Глобальное состояние через Redux Toolkit.
+- Mock API с задержкой + хранение данных в localStorage.
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+# Технологии
 
-## Expanding the ESLint configuration
+- React 19
+- React Router
+- Redux Toolkit + React Redux
+- dnd-kit
+- Tailwind CSS
+- Vite
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+# Запуск проекта
+
+Требования:
+- Node.js 18+
+- npm
+
+Установка и запуск:
+1. Откройте терминал (PowerShell или cmd) и перейдите в папку, куда хотите положить проект:
+
+   ```bash
+   cd C:\Users\ВашПользователь\Desktop
+   ```
+
+2. Склонируйте репозиторий (подставьте свой URL с GitHub - HTTPS или SSH):
+
+   ```bash
+   git clone https://github.com/Ващ_Логин/trellopractice.git
+   ```
+
+3. Перейдите в папку, которую создал `git clone` — по умолчанию это имя репозитория `trellopractice`:
+
+   ```bash
+   cd trellopractice
+   ```
+
+Установка зависимостей
+npm install
+npm run dev
+
+После запуска откройте адрес из терминала (http://localhost:5173).
+
+# Хранение данных
+
+Проект работает без реального бэкенда.
+
+Используются:
+
+- mock API с задержкой (src/api/boardsApi.js);
+- localStorage.
+
+Ключи localStorage:
+
+- tenma_users — пользователи (email + пароль);
+- tenma_session — текущая сессия;
+- tenma_boards — доски/колонки/карточки;
+- tenma_app_background — пользовательский фон приложения.
